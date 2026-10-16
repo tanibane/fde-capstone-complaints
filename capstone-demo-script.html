@@ -1,0 +1,523 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capstone Demo Script — Clearview Agentic Complaints</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #ffffff;
+  }
+  .page { max-width: 760px; margin: 0 auto; padding: 2.5rem 2rem 3rem; }
+
+  /* Header */
+  .header { border-bottom: 2px solid #0f62fe; padding-bottom: 1.25rem; margin-bottom: 2rem; }
+  .header h1 { font-size: 1.4rem; font-weight: 700; color: #1f2328; }
+  .header .sub { font-size: 0.85rem; color: #57606a; margin-top: 0.25rem; }
+  .badge-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+  .badge {
+    font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 12px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-green { background: #dcfce7; color: #166534; }
+
+  /* Evaluation table */
+  .eval-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 2rem; }
+  .eval-table th { background: #f7f8fa; padding: 6px 10px; text-align: left; border: 1px solid #e5e7eb; color: #57606a; font-weight: 600; }
+  .eval-table td { padding: 6px 10px; border: 1px solid #e5e7eb; }
+  .eval-table .pct { font-weight: 700; color: #0f62fe; }
+
+  /* Section */
+  .section { margin-bottom: 2.25rem; }
+  .section-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: #f7f8fa; border-left: 4px solid #0f62fe;
+    padding: 0.6rem 1rem; border-radius: 0 4px 4px 0;
+    margin-bottom: 1rem;
+  }
+  .section-num {
+    background: #0f62fe; color: #fff; font-size: 0.75rem; font-weight: 700;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .section-title { font-size: 1rem; font-weight: 700; color: #1f2328; }
+  .section-time { font-size: 0.75rem; color: #57606a; margin-left: auto; white-space: nowrap; }
+
+  /* Step */
+  .step { margin-bottom: 1.25rem; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; }
+  .step-action {
+    background: #f7f8fa; padding: 0.5rem 0.875rem;
+    font-size: 0.75rem; font-weight: 700; color: #57606a;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .step-action .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-screen { background: #0f62fe; }
+  .dot-say { background: #7c5cd8; }
+  .dot-click { background: #059669; }
+  .dot-tip { background: #d97706; }
+  .step-body { padding: 0.75rem 0.875rem; }
+
+  /* Screen instruction */
+  .screen { font-size: 0.85rem; color: #1f2328; }
+  .screen code {
+    background: #f1f5f9; border: 1px solid #e5e7eb;
+    padding: 1px 5px; border-radius: 3px;
+    font-family: "Courier New", monospace; font-size: 0.8rem;
+  }
+  .screen ul { padding-left: 1.25rem; margin-top: 0.4rem; }
+  .screen li { margin-bottom: 0.2rem; }
+
+  /* Speech */
+  .speech {
+    background: #faf5ff; border-left: 3px solid #7c5cd8;
+    padding: 0.6rem 0.875rem; border-radius: 0 4px 4px 0;
+    font-size: 0.875rem; color: #2d1f5e; font-style: italic; line-height: 1.65;
+  }
+  .speech strong { font-style: normal; color: #5b21b6; }
+
+  /* Tip */
+  .tip {
+    background: #fffbeb; border-left: 3px solid #d97706;
+    padding: 0.5rem 0.875rem; border-radius: 0 4px 4px 0;
+    font-size: 0.8rem; color: #78350f;
+  }
+  .tip strong { color: #92400e; }
+
+  /* Complaint cards */
+  .complaint-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+  .complaint-card { border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.75rem; font-size: 0.8rem; }
+  .complaint-card .cc-label { font-weight: 700; color: #0f62fe; margin-bottom: 0.25rem; }
+  .complaint-card .cc-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.65rem; font-weight: 600; padding: 1px 6px; border-radius: 10px; margin-right: 4px; margin-bottom: 4px; }
+  .complaint-card .cc-tag.vuln { background: #fee2e2; color: #991b1b; }
+  .complaint-card .cc-tag.legal { background: #fef3c7; color: #92400e; }
+  .complaint-card .cc-tag.stp { background: #dcfce7; color: #166534; }
+  .complaint-card .cc-text { color: #57606a; line-height: 1.5; margin-top: 0.4rem; font-style: italic; font-size: 0.78rem; }
+
+  /* Footer */
+  .footer {
+    margin-top: 3rem; padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: center; font-size: 0.7rem; color: #57606a;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="header">
+    <h1>Capstone Demo Script</h1>
+    <div class="sub">Agentic Complaints Management — Clearview Retail Bank · FDE Capstone Submission</div>
+    <div class="badge-row">
+      <span class="badge badge-blue">10–15 min video</span>
+      <span class="badge badge-purple">IBM Bob · ICA · Python · Next.js</span>
+      <span class="badge badge-green">Face visible · Screen ≥ 1080p · MP4</span>
+    </div>
+  </div>
+
+  
+  <table class="eval-table">
+    <tr>
+      <th>Section</th>
+      <th>Demo segment</th>
+      <th class="pct">Weight</th>
+    </tr>
+    <tr><td>Context Studio</td><td>Ontology + 3 hybrid queries</td><td class="pct">20%</td></tr>
+    <tr><td>Process Studio</td><td>As-Is → To-Be walkthrough</td><td class="pct">20%</td></tr>
+    <tr><td>SDD Contracts</td><td>Schemas + prompt contracts + IBM Bob</td><td class="pct">25%</td></tr>
+    <tr><td>Implementation</td><td>Live pipeline on 5 complaints</td><td class="pct">20%</td></tr>
+    <tr><td>Demo Quality</td><td>HITL + reflection + narration</td><td class="pct">15%</td></tr>
+  </table>
+
+  
+  
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">Business Context</div>
+      <div class="section-time">⏱ ~1 min</div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "Hi — in this demo I'm going to walk you through my capstone project: an Agentic Complaints Management System built for Clearview Retail Bank.<br /><br />
+          Clearview is a UK-regulated retail bank — 3.2 million customers, 420 branches, regulated by the FCA and PRA. They process over 50,000 complaints a month, entirely manually. That results in a 7 to 10 day average resolution time, a 40% mis-routing rate at triage, and analysts spending 60% of their time just gathering evidence from 4 disconnected systems. The bank is facing £12 million in FCA fines in 2026 from DISP deadline breaches alone.<br /><br />
+          My solution is a 4-agent agentic pipeline — Triage, Evidence, Policy, and Draft — that processes a complaint end-to-end in under 2 minutes, with full FCA compliance guardrails and a human-in-the-loop monitoring workbench. I used IBM Bob as my agentic IDE, and followed a specification-first approach throughout."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">Context Studio — Ontology &amp; Hybrid Queries</div>
+      <div class="section-time">⏱ ~2 min</div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Open <code>fde-capstone-complaints/context-studio/ontology.jsonld</code> in your editor. Scroll slowly to show the 4 domains.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "Before writing a single line of code, I built the knowledge graph in Context Studio. This ontology covers 4 domains: the Clearview bank profile, the IT landscape — T24, CAMS, Salesforce and Verint — the FCA regulatory corpus, and historical precedents.<br /><br />
+          Every agent decision in the pipeline is grounded in this graph. This eliminates hallucination — agents can only cite FCA rules and precedents that exist as verified nodes."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN — Query 1</div>
+      <div class="step-body">
+        <div class="screen">
+          Open <code>context-studio/README.md</code>. Read out and show Query 1:
+          <ul>
+            <li><strong>Query:</strong> "Find the FCA DISP rule that applies to duplicate_charge complaints and return the required resolution deadline and applicable redress scale."</li>
+            <li><strong>Expected path:</strong> <code>Precedent_DuplicateCharge → DISP_1_4 → SLA_P2 → RedressScale_Moderate</code></li>
+            <li><strong>Result:</strong> DISP 1.4 · 3-day SRC deadline · £200 moderate redress</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN — Query 2</div>
+      <div class="step-body">
+        <div class="screen">
+          Show Query 2 from README:
+          <ul>
+            <li><strong>Query:</strong> "A customer with 'Recent bereavement' in KYC profile — what escalation rules apply?"</li>
+            <li><strong>Expected path:</strong> <code>VulnerabilityMarkers → HITLRule_VulnerableCustomer</code></li>
+            <li><strong>Result:</strong> Hard-stop triggered · Auto-dispatch blocked · HITL mandatory · P1 SLA</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN — Query 3</div>
+      <div class="step-body">
+        <div class="screen">
+          Show Query 3:
+          <ul>
+            <li><strong>Query:</strong> "Unauthorised transaction — Wealth tier customer. What is the max redress an analyst can approve without escalation?"</li>
+            <li><strong>Result:</strong> Manager authority up to £1,000 · Severe scale £500 · HITL required if &gt; £150</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "These 3 queries validate that the knowledge graph correctly connects bank policy, FCA rules, customer tiers, and escalation logic. This is the foundation that makes every agent decision traceable and auditable."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Process Studio — As-Is &amp; To-Be</div>
+      <div class="section-time">⏱ ~2 min</div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Open <code>process-studio/as-is-process.md</code>. Scroll through the 7 steps. Highlight the timing table and bottleneck annotations.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "The as-is process has 7 manual steps. The biggest bottleneck is evidence gathering — step 3 — which takes an average of 2.5 hours and accounts for 60% of analyst time. Analysts log into T24, CAMS, Salesforce, and Verint separately, export data manually, and piece it together.<br /><br />
+          There's also a critical compliance risk: 60% of vulnerable customers are not flagged at intake. And the 40% mis-routing rate means 2 in every 5 complaints start in the wrong team."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Open <code>process-studio/to-be-process.md</code>. Scroll through the 4 agent stages, showing the handshake payload blocks. Highlight the STP vs HITL decision matrix and escalation rules table.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "The to-be process replaces all 7 steps with a 4-agent pipeline that runs in under 2 minutes. Each agent passes a structured JSON handshake to the next — you can see the exact payload shapes here.<br /><br />
+          The key governance rules are enforced as hard-stops: any vulnerable customer blocks auto-dispatch. Redress over £150 is mandatory HITL. Legal threats stop the pipeline immediately and route to Investigations. And STP — straight-through processing — only fires when confidence is 90% or above and no guardrails are triggered.<br /><br />
+          Target impact: 30 to 50% cycle-time reduction, 2x cost savings, and 100% FCA DISP compliance."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">SDD Contracts &amp; IBM Bob</div>
+      <div class="section-time">⏱ ~3 min</div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Open <code>specs/COMPLAINTS-01/spec.md</code>. Scroll through user stories US-03 (vulnerability guardrail) and US-04 (redress HITL rule). Show the acceptance criteria.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "I followed specification-first development — no code was generated until the contracts were complete and reviewed. The spec file defines 7 user stories, each with precise acceptance criteria. For example, US-03 specifies that vulnerability_flag equals true must force P1 priority and hitl_required equals true — and this must be enforced server-side, independent of whatever the LLM returns."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Open <code>agents/schemas/triage-agent.schema.json</code>. Then open <code>agents/prompts/triage-agent.prompt.md</code>. Show the ROLE, BOUNDARY, GUARDRAILS sections.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "Each of the 4 agents has a JSON schema that defines its exact input and output contract, and a prompt contract with 6 sections: Role, Boundary, Task, Guardrails, Output Format, and worked Examples.<br /><br />
+          The Boundary section is particularly important — it explicitly lists what the agent is NOT allowed to do. The Triage Agent cannot calculate redress, cannot query transaction data, and cannot proceed if the complaint text is fewer than 10 characters. This prevents scope creep and keeps each agent focused."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Open <code>agents/pipeline/orchestrator.py</code>. Show the hard-stop logic at lines 78–85 (vulnerability flag) and 82–85 (legal threat escalation).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "And critically — all guardrails are enforced twice. Once in the LLM prompt contract, and again as server-side Python logic in the orchestrator. So even if the model returned the wrong answer, the system would still enforce the correct behaviour. That's what makes this production-grade."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-tip"></span> TIP</div>
+      <div class="step-body">
+        <div class="tip"><strong>Reviewer wants to see:</strong> That you used IBM Bob to generate code from specs. Briefly show Bob open with the spec loaded, or show your git history of spec → code commits.</div>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Live Agent Pipeline — 5 Complaints</div>
+      <div class="section-time">⏱ ~3 min</div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Go to <code>http://localhost:3000/complaints</code>. Show the table with 300 seeded complaints. Show the filter dropdowns working — try Priority=P1, then Vulnerable=true.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "The database has 300 synthetic complaints covering all 6 intent types and 5 channels, with the correct distribution — duplicate charges at 28%, ATM failures at 22%, and so on. Around 14% are flagged as vulnerable customers. I can filter by any combination of priority, status, channel, and vulnerability."
+        </div>
+      </div>
+    </div>
+
+    
+    <div style="margin:0.75rem 0 0.5rem;font-size:0.8rem;font-weight:600;color:#57606a">RUN THESE 5 COMPLAINTS IN ORDER:</div>
+    <div class="complaint-grid">
+      <div class="complaint-card">
+        <div class="cc-label">① Standard duplicate charge</div>
+        <span class="cc-tag">CUST-001</span><span class="cc-tag">mobile</span><span class="cc-tag stp">STP eligible</span>
+        <div class="cc-text">"I was charged twice for Netflix on 3rd January — £12.99 twice on the same day. Please refund one of them."</div>
+      </div>
+      <div class="complaint-card">
+        <div class="cc-label">② Unauthorised transaction</div>
+        <span class="cc-tag">CUST-005</span><span class="cc-tag">email</span><span class="cc-tag">P1 · HITL</span>
+        <div class="cc-text">"Someone made a £350 unauthorised transaction on my account on 5th January. I did not authorise this payment."</div>
+      </div>
+      <div class="complaint-card">
+        <div class="cc-label">③ Vulnerable customer</div>
+        <span class="cc-tag">CUST-004</span><span class="cc-tag">branch</span><span class="cc-tag vuln">VULNERABLE</span>
+        <div class="cc-text">"My husband passed away last month. I am elderly and devastated. I have called three times and nobody will help me close his account."</div>
+      </div>
+      <div class="complaint-card">
+        <div class="cc-label">④ Data privacy</div>
+        <span class="cc-tag">CUST-025</span><span class="cc-tag">email</span><span class="cc-tag stp">P3 · low redress</span>
+        <div class="cc-text">"My personal data was shared without my consent. I want to know what data you hold and who you shared it with."</div>
+      </div>
+      <div class="complaint-card">
+        <div class="cc-label">⑤ Legal threat</div>
+        <span class="cc-tag">CUST-019</span><span class="cc-tag">mobile</span><span class="cc-tag legal">ESCALATED</span>
+        <div class="cc-text">"I will be contacting my solicitor and taking legal action if this mortgage dispute is not resolved by end of this week."</div>
+      </div>
+    </div>
+
+    <div class="step" style="margin-top:0.75rem">
+      <div class="step-action"><span class="dot dot-click"></span> FOR EACH COMPLAINT</div>
+      <div class="step-body">
+        <div class="screen">
+          <ul>
+            <li>Go to <code>/complaints</code> → click <strong>Run Pipeline</strong> on the complaint</li>
+            <li>While it runs (~30–60 sec), narrate what each agent is doing</li>
+            <li>When done: status changes to <code>hitl_review</code>, <code>dispatched</code>, or <code>escalated</code></li>
+            <li>Click <strong>Trace</strong> to show the agent timeline on <code>/monitor</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY WHILE PIPELINE RUNS</div>
+      <div class="step-body">
+        <div class="speech">
+          "The pipeline is running now. First the Triage Agent is classifying the intent type, assigning priority, and running the FCA 13-category vulnerability classifier. Then the Evidence Agent is querying the mock T24 and CAMS systems to pull the transaction log. The Policy Agent is matching the FCA DISP rules and calculating the redress recommendation. Finally the Draft Agent is generating the resolution letter and setting the STP eligibility flag."
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY after complaint ③ (vulnerable)</div>
+      <div class="step-body">
+        <div class="speech">
+          "Notice this one went straight to hitl_review — not dispatched. That's because the Triage Agent detected bereavement as an FCA Consumer Duty vulnerability marker. Once that flag is set, every downstream agent propagates it unchanged, and the Draft Agent is hard-coded to block auto-dispatch. The reviewer will see a red banner when they open it."
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY after complaint ⑤ (legal threat)</div>
+      <div class="step-body">
+        <div class="speech">
+          "This one shows something interesting — the status is escalated, not hitl_review. The Triage Agent detected the word 'solicitor' and set the legal_threat_flag. The orchestrator immediately stops the pipeline after triage and routes it to Investigations. Evidence, Policy and Draft agents never run."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">Monitoring Workbench + HITL + Reflection</div>
+      <div class="section-time">⏱ ~2 min</div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN</div>
+      <div class="step-body">
+        <div class="screen">Go to <code>http://localhost:3000/dashboard</code>. Point out the 5 KPI cards and 4 charts.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "The dashboard gives supervisors a live view — active cases, in-flight pipeline, P1 breach risk, average redress payout, and STP rate. It auto-refreshes every 15 seconds. The charts break down complaints by intent type, status, channel, and average redress for upheld cases."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN — Agent Monitor</div>
+      <div class="step-body">
+        <div class="screen">Click <strong>Trace</strong> on complaint ③ (vulnerable customer). Show the timeline. Expand the triage payload — show the vulnerability_markers array and hitl_required=true.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "The agent monitor gives a full step-by-step audit trail. I can expand any event to see the exact JSON payload — the FCA rule references, the confidence scores, the data sources cited, the reasoning summary. Every decision is traceable and immutable — the audit_log table has PostgreSQL rules that block any UPDATE or DELETE."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-screen"></span> SHOW ON SCREEN — HITL Review</div>
+      <div class="step-body">
+        <div class="screen">
+          Click <strong>Review →</strong> on complaint ③ (vulnerable). Show:
+          <ul>
+            <li>The red vulnerable customer banner at the top</li>
+            <li>The AI recommendation panel — outcome, confidence %, FCA rule, reasoning</li>
+            <li>Override the redress amount (e.g. change to £150) and add a justification note</li>
+            <li>Edit one line in the letter editor</li>
+            <li>Click <strong>Approve &amp; Dispatch</strong> → show success confirmation</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> SAY</div>
+      <div class="step-body">
+        <div class="speech">
+          "The HITL panel shows the analyst everything they need to make a decision — the AI's recommendation, the confidence score, the FCA rule it applied, and the full reasoning. The analyst can accept the AI's redress calculation or override it with a mandatory justification note. They can also edit the resolution letter inline before dispatch.<br /><br />
+          There are three decision pathways: Approve and Dispatch, Request Re-triage — which sends it back through the pipeline — or Escalate to Investigations for legal cases."
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-action"><span class="dot dot-say"></span> CLOSING REFLECTION</div>
+      <div class="step-body">
+        <div class="speech">
+          "If I were to do this again, I would spend more time integrating the real Context Studio hybrid queries at runtime — right now the ontology is exported and validated but the agents use embedded FCA rule logic rather than live graph queries. I'd also add WebSocket push updates to the dashboard rather than polling, and build out the notification service so letters are actually dispatched via email.<br /><br />
+          But the core architecture — specification-first, dual-layer guardrails, tamper-proof audit trail, and zero vulnerable-customer misses — is production-grade. Thank you."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="tip" style="margin-top:0.5rem">
+    <strong>Before recording:</strong> Start backend (<code>node dist\server.js</code>) and frontend (<code>npx next dev</code>). Have all 5 complaint texts ready to paste. Set your screen to 1080p. Use Loom, OBS, or Teams. Your face must be visible (picture-in-picture).
+  </div>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

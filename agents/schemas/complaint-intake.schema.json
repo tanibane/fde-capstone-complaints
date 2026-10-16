@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://clearview-bank.co.uk/schemas/complaint-intake.schema.json",
+  "title": "ComplaintIntake",
+  "description": "Schema for incoming complaint records from any channel.",
+  "type": "object",
+  "required": ["complaint_id", "customer_id", "channel", "complaint_text", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "complaint_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier assigned at intake (UUID v4)"
+    },
+    "customer_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Clearview internal customer identifier"
+    },
+    "channel": {
+      "type": "string",
+      "enum": ["branch", "call_centre", "mobile", "email", "social_media"],
+      "description": "Channel through which the complaint was received"
+    },
+    "complaint_text": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 5000,
+      "description": "Raw complaint text as submitted by the customer"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of complaint creation"
+    },
+    "attachments": {
+      "type": "array",
+      "description": "Optional file attachment references",
+      "items": {
+        "type": "object",
+        "required": ["filename", "mime_type", "storage_ref"],
+        "properties": {
+          "filename": { "type": "string" },
+          "mime_type": { "type": "string" },
+          "storage_ref": { "type": "string" }
+        }
+      }
+    },
+    "customer_tier": {
+      "type": "string",
+      "enum": ["standard", "premier", "wealth", "sme"],
+      "description": "Customer tier from CRM — populated by intake service"
+    }
+  }
+}

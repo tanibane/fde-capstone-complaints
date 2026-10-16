@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://clearview-bank.co.uk/schemas/evidence-agent.schema.json",
+  "title": "EvidenceAgentContract",
+  "description": "Input/output schema for the Evidence Agent.",
+  "type": "object",
+  "definitions": {
+    "TransactionRecord": {
+      "type": "object",
+      "required": ["transaction_id", "date", "amount", "description", "source_system"],
+      "properties": {
+        "transaction_id": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "default": "GBP" },
+        "description": { "type": "string" },
+        "merchant_id": { "type": "string" },
+        "source_system": { "type": "string", "enum": ["T24", "CAMS"] }
+      }
+    },
+    "CardDisputeRecord": {
+      "type": "object",
+      "required": ["dispute_id", "date_raised", "amount", "status", "source_system"],
+      "properties": {
+        "dispute_id": { "type": "string" },
+        "date_raised": { "type": "string", "format": "date" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "default": "GBP" },
+        "status": {
+          "type": "string",
+          "enum": ["open", "resolved", "pending_chargeback", "closed"]
+        },
+        "merchant_id": { "type": "string" },
+        "chargeback_ref": { "type": "string" },
+        "source_system": { "type": "string", "enum": ["CAMS"] }
+      }
+    },
+    "CRMRecord": {
+      "type": "object",
+      "required": ["case_id", "created_at", "status", "category", "source_system"],
+      "properties": {
+        "case_id": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "resolved_at": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["open", "closed", "escalated"] },
+        "category": { "type": "string" },
+        "summary": { "type": "string" },
+        "source_system": { "type": "string", "enum": ["Salesforce"] }
+      }
+    },
+    "CallTranscript": {
+      "type": "object",
+      "required": ["call_id", "date", "duration_seconds", "transcript_text", "source_system"],
+      "properties": {
+        "call_id": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "duration_seconds": { "type": "integer" },
+        "transcript_text": { "type": "string" },
+        "sentiment_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "source_system": { "type": "string", "enum": ["Verint"] }
+      }
+    },
+    "EvidenceOutput": {
+      "type": "object",
+      "required": [
+        "complaint_id",
+        "transaction_log",
+        "card_disputes",
+        "crm_history",
+        "call_transcripts",
+        "evidence_summary",
+        "confidence_score",
+        "data_sources",
+        "processed_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "complaint_id": { "type": "string", "format": "uuid" },
+        "transaction_log": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/TransactionRecord" },
+          "description": "90-day transaction history from T24/CAMS"
+        },
+        "card_disputes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CardDisputeRecord" },
+          "description": "Card dispute records from CAMS"
+        },
+        "crm_history": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CRMRecord" },
+          "description": "Previous case history from Salesforce FSC"
+        },
+        "call_transcripts": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CallTranscript" },
+          "description": "Relevant call transcripts from Verint IVR"
+        },
+        "evidence_summary": {
+          "type": "string",
+          "description": "Human-readable summary of gathered evidence"
+        },
+        "confidence_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "data_sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "processed_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "properties": {
+    "output": { "$ref": "#/definitions/EvidenceOutput" }
+  }
+}

@@ -1,0 +1,165 @@
+// Prisma schema for Clearview Complaints Management
+// PostgreSQL 15
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  customerId           String      @id @map("customer_id") @db.VarChar(50)
+  fullName             String      @map("full_name") @db.VarChar(200)
+  email                String?     @db.VarChar(200)
+  phone                String?     @db.VarChar(30)
+  tier                 String      @default("standard")
+  vulnerabilityFlag    Boolean     @default(false) @map("vulnerability_flag")
+  vulnerabilityMarkers Json        @default("[]") @map("vulnerability_markers")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  complaints           Complaint[]
+
+  @@map("customers")
+}
+
+model Complaint {
+  complaintId       String        @id @default(uuid()) @map("complaint_id") @db.Uuid
+  customerId        String        @map("customer_id") @db.VarChar(50)
+  channel           String
+  complaintText     String        @map("complaint_text")
+  status            String        @default("intake")
+  priority          String?
+  intentType        String?       @map("intent_type")
+  vulnerabilityFlag Boolean       @default(false) @map("vulnerability_flag")
+  legalThreatFlag   Boolean       @default(false) @map("legal_threat_flag")
+  fcaDeadline       DateTime?     @map("fca_deadline")
+  disp14Deadline    DateTime?     @map("disp_14_deadline")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  customer          Customer      @relation(fields: [customerId], references: [customerId])
+  triageOutput      TriageOutput?
+  evidenceOutput    EvidenceOutput?
+  policyOutput      PolicyOutput?
+  draftOutput       DraftOutput?
+  hitlReviews       HitlReview[]
+  auditLogs         AuditLog[]
+
+  @@map("complaints")
+}
+
+model TriageOutput {
+  id                   String    @id @default(uuid()) @db.Uuid
+  complaintId          String    @unique @map("complaint_id") @db.Uuid
+  priority             String
+  intentType           String    @map("intent_type")
+  vulnerabilityFlag    Boolean   @default(false) @map("vulnerability_flag")
+  vulnerabilityMarkers Json      @default("[]") @map("vulnerability_markers")
+  sentimentScore       Decimal   @map("sentiment_score") @db.Decimal(4, 3)
+  channelWeight        Decimal   @map("channel_weight") @db.Decimal(4, 3)
+  confidenceScore      Decimal   @map("confidence_score") @db.Decimal(4, 3)
+  hitlRequired         Boolean   @default(false) @map("hitl_required")
+  legalThreatFlag      Boolean   @default(false) @map("legal_threat_flag")
+  dataSources          Json      @default("[]") @map("data_sources")
+  reasoningSummary     String?   @map("reasoning_summary")
+  processedAt          DateTime  @default(now()) @map("processed_at")
+
+  complaint            Complaint @relation(fields: [complaintId], references: [complaintId])
+
+  @@map("triage_outputs")
+}
+
+model EvidenceOutput {
+  id               String    @id @default(uuid()) @db.Uuid
+  complaintId      String    @unique @map("complaint_id") @db.Uuid
+  transactionLog   Json      @default("[]") @map("transaction_log")
+  cardDisputes     Json      @default("[]") @map("card_disputes")
+  crmHistory       Json      @default("[]") @map("crm_history")
+  callTranscripts  Json      @default("[]") @map("call_transcripts")
+  evidenceSummary  String?   @map("evidence_summary")
+  confidenceScore  Decimal   @map("confidence_score") @db.Decimal(4, 3)
+  dataSources      Json      @default("[]") @map("data_sources")
+  processedAt      DateTime  @default(now()) @map("processed_at")
+
+  complaint        Complaint @relation(fields: [complaintId], references: [complaintId])
+
+  @@map("evidence_outputs")
+}
+
+model PolicyOutput {
+  id                    String    @id @default(uuid()) @db.Uuid
+  complaintId           String    @unique @map("complaint_id") @db.Uuid
+  outcome               String
+  fcaRuleRefs           Json      @default("[]") @map("fca_rule_refs")
+  redressAmount         Decimal   @default(0) @map("redress_amount") @db.Decimal(10, 2)
+  redressCurrency       String    @default("GBP") @map("redress_currency")
+  redressTier           String    @map("redress_tier")
+  redressJustification  String?   @map("redress_justification")
+  liabilityParty        String    @map("liability_party")
+  precedentRefs         Json      @default("[]") @map("precedent_refs")
+  sopRefs               Json      @default("[]") @map("sop_refs")
+  confidenceScore       Decimal   @map("confidence_score") @db.Decimal(4, 3)
+  hitlRequired          Boolean   @default(false) @map("hitl_required")
+  reasoningSummary      String?   @map("reasoning_summary")
+  dataSources           Json      @default("[]") @map("data_sources")
+  processedAt           DateTime  @default(now()) @map("processed_at")
+
+  complaint             Complaint @relation(fields: [complaintId], references: [complaintId])
+
+  @@map("policy_outputs")
+}
+
+model DraftOutput {
+  id               String    @id @default(uuid()) @db.Uuid
+  complaintId      String    @unique @map("complaint_id") @db.Uuid
+  resolutionLetter String    @map("resolution_letter")
+  letterSubject    String?   @map("letter_subject")
+  redressPackage   Json      @default("{}") @map("redress_package")
+  stpEligible      Boolean   @default(false) @map("stp_eligible")
+  dispatchTrigger  Boolean   @default(false) @map("dispatch_trigger")
+  hitlRequired     Boolean   @default(false) @map("hitl_required")
+  auditTrailId     String?   @map("audit_trail_id") @db.Uuid
+  fcaDeadline      DateTime? @map("fca_deadline")
+  disp14Deadline   DateTime? @map("disp_14_deadline")
+  confidenceScore  Decimal   @map("confidence_score") @db.Decimal(4, 3)
+  dataSources      Json      @default("[]") @map("data_sources")
+  processedAt      DateTime  @default(now()) @map("processed_at")
+
+  complaint        Complaint @relation(fields: [complaintId], references: [complaintId])
+
+  @@map("draft_outputs")
+}
+
+model HitlReview {
+  id                    String    @id @default(uuid()) @db.Uuid
+  complaintId           String    @map("complaint_id") @db.Uuid
+  analystId             String    @map("analyst_id") @db.VarChar(100)
+  decision              String    // approved | re_triage | escalated
+  redressOverride       Decimal?  @map("redress_override") @db.Decimal(10, 2)
+  redressJustification  String?   @map("redress_justification")
+  letterEdits           String?   @map("letter_edits")
+  notes                 String?
+  reviewedAt            DateTime  @default(now()) @map("reviewed_at")
+
+  complaint             Complaint @relation(fields: [complaintId], references: [complaintId])
+
+  @@map("hitl_reviews")
+}
+
+model AuditLog {
+  auditId         String    @id @default(uuid()) @map("audit_id") @db.Uuid
+  complaintId     String    @map("complaint_id") @db.Uuid
+  eventType       String    @map("event_type")
+  agentName       String?   @map("agent_name")
+  payload         Json      @default("{}")
+  confidenceScore Decimal?  @map("confidence_score") @db.Decimal(4, 3)
+  dataSources     Json      @default("[]") @map("data_sources")
+  entryHash       String    @map("entry_hash") @db.VarChar(64)
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  complaint       Complaint @relation(fields: [complaintId], references: [complaintId])
+
+  @@map("audit_log")
+}

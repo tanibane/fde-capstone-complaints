@@ -1,0 +1,346 @@
+{
+  "@context": {
+    "@vocab": "https://clearview-bank.co.uk/ontology#",
+    "schema": "https://schema.org/",
+    "fca": "https://www.fca.org.uk/ontology/disp#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "label": "rdfs:label",
+    "comment": "rdfs:comment"
+  },
+  "@graph": [
+
+    {
+      "@id": "clearview:Bank",
+      "@type": "schema:Organization",
+      "label": "Clearview Retail Bank plc",
+      "schema:foundingDate": "1882",
+      "schema:location": "Edinburgh, UK",
+      "schema:numberOfEmployees": 12400,
+      "clearview:aum": "£38bn",
+      "clearview:customerCount": 3200000,
+      "clearview:branchCount": 420,
+      "clearview:regulators": ["clearview:FCA", "clearview:PRA"],
+      "clearview:coreSystemStack": [
+        "clearview:TemenosT24",
+        "clearview:FISCAMS",
+        "clearview:SalesforceFSC",
+        "clearview:VerintIVR"
+      ]
+    },
+
+    {
+      "@id": "clearview:CustomerTier_Standard",
+      "@type": "clearview:CustomerTier",
+      "label": "Standard",
+      "clearview:redressAuthority": "clearview:RedressAuthority_Analyst"
+    },
+    {
+      "@id": "clearview:CustomerTier_Premier",
+      "@type": "clearview:CustomerTier",
+      "label": "Premier",
+      "clearview:redressAuthority": "clearview:RedressAuthority_Lead"
+    },
+    {
+      "@id": "clearview:CustomerTier_Wealth",
+      "@type": "clearview:CustomerTier",
+      "label": "Wealth",
+      "clearview:redressAuthority": "clearview:RedressAuthority_Manager"
+    },
+    {
+      "@id": "clearview:CustomerTier_SME",
+      "@type": "clearview:CustomerTier",
+      "label": "SME",
+      "clearview:redressAuthority": "clearview:RedressAuthority_Manager"
+    },
+
+    {
+      "@id": "clearview:RedressAuthority_Analyst",
+      "@type": "clearview:RedressAuthority",
+      "label": "Analyst",
+      "clearview:maxRedressAmount": { "@value": "50", "@type": "xsd:decimal" },
+      "clearview:currency": "GBP"
+    },
+    {
+      "@id": "clearview:RedressAuthority_Lead",
+      "@type": "clearview:RedressAuthority",
+      "label": "Lead",
+      "clearview:maxRedressAmount": { "@value": "250", "@type": "xsd:decimal" },
+      "clearview:currency": "GBP"
+    },
+    {
+      "@id": "clearview:RedressAuthority_Manager",
+      "@type": "clearview:RedressAuthority",
+      "label": "Manager",
+      "clearview:maxRedressAmount": { "@value": "1000", "@type": "xsd:decimal" },
+      "clearview:currency": "GBP"
+    },
+
+    {
+      "@id": "clearview:BrandVoice",
+      "@type": "clearview:CommunicationStandard",
+      "label": "Clearview Brand Voice",
+      "clearview:tone": ["empathic", "legally precise", "non-defensive"],
+      "clearview:appliesTo": "clearview:ResolutionLetter"
+    },
+
+    {
+      "@id": "clearview:TemenosT24",
+      "@type": "clearview:CoreBankingSystem",
+      "label": "Temenos T24 Core Banking System",
+      "clearview:provides": [
+        "clearview:AccountBalances",
+        "clearview:OverdraftData",
+        "clearview:FeeLedger",
+        "clearview:TransactionHistory"
+      ],
+      "clearview:restEndpoints": ["/accounts", "/transactions"],
+      "clearview:dataRetentionDays": 90
+    },
+    {
+      "@id": "clearview:FISCAMS",
+      "@type": "clearview:PaymentSystem",
+      "label": "FIS CAMS Card Authorisation & Management",
+      "clearview:provides": [
+        "clearview:DebitAuthorisations",
+        "clearview:CreditAuthorisations",
+        "clearview:ChargebackRecords",
+        "clearview:CardDisputes"
+      ],
+      "clearview:restEndpoints": ["/cards", "/chargebacks"]
+    },
+    {
+      "@id": "clearview:SalesforceFSC",
+      "@type": "clearview:CRMSystem",
+      "label": "Salesforce Financial Services Cloud CRM",
+      "clearview:provides": [
+        "clearview:CaseHistory",
+        "clearview:InteractionLog",
+        "clearview:KYCProfile"
+      ],
+      "clearview:restEndpoints": ["/customers", "/cases"]
+    },
+    {
+      "@id": "clearview:VerintIVR",
+      "@type": "clearview:CallSystem",
+      "label": "Verint IVR Call Recording",
+      "clearview:provides": [
+        "clearview:CallRecordings",
+        "clearview:SpeechToTextTranscripts"
+      ]
+    },
+    {
+      "@id": "clearview:PostgresMCP",
+      "@type": "clearview:DataStore",
+      "label": "PostgreSQL MCP Schema",
+      "clearview:tables": [
+        "complaints", "triage_outputs", "evidence_outputs",
+        "policy_outputs", "draft_outputs", "hitl_reviews",
+        "audit_log", "customers"
+      ]
+    },
+
+    {
+      "@id": "clearview:FCA",
+      "@type": "clearview:Regulator",
+      "label": "Financial Conduct Authority",
+      "clearview:governs": "clearview:Bank",
+      "clearview:rules": ["fca:DISP_1_4", "fca:DISP_1_6", "fca:ConsumerDuty"]
+    },
+    {
+      "@id": "fca:DISP_1_4",
+      "@type": "fca:RegulatoryRule",
+      "label": "FCA DISP 1.4 — Summary Resolution Communication",
+      "fca:requirement": "Issue a Summary Resolution Communication within 3 business days of receiving a complaint",
+      "fca:deadline_days": 3,
+      "fca:breachPenalty": "Reportable breach; potential FCA fine",
+      "clearview:mapsTo": "clearview:SLA_P1"
+    },
+    {
+      "@id": "fca:DISP_1_6",
+      "@type": "fca:RegulatoryRule",
+      "label": "FCA DISP 1.6 — Final Response Deadline",
+      "fca:requirement": "Issue a final response within 8 weeks of receiving a complaint",
+      "fca:deadline_weeks": 8,
+      "fca:breachPenalty": "£12M aggregate fine exposure; FOS referral right triggered"
+    },
+    {
+      "@id": "fca:ConsumerDuty",
+      "@type": "fca:RegulatoryRule",
+      "label": "FCA Consumer Duty",
+      "fca:outcomes": [
+        "Products and services meet customer needs",
+        "Fair value delivered",
+        "Customers supported to make informed decisions",
+        "Customers receive good outcomes"
+      ],
+      "fca:vulnerabilityMarkerCount": 13
+    },
+
+    {
+      "@id": "clearview:SLA_P1",
+      "@type": "clearview:SLATier",
+      "label": "P1 — Urgent",
+      "clearview:resolutionHours": 4,
+      "clearview:triggerConditions": [
+        "Unauthorised transaction",
+        "Account frozen",
+        "Vulnerable customer detected"
+      ]
+    },
+    {
+      "@id": "clearview:SLA_P2",
+      "@type": "clearview:SLATier",
+      "label": "P2 — High",
+      "clearview:resolutionHours": 24,
+      "clearview:triggerConditions": ["Duplicate charge", "ATM failure"]
+    },
+    {
+      "@id": "clearview:SLA_P3",
+      "@type": "clearview:SLATier",
+      "label": "P3 — Normal",
+      "clearview:resolutionHours": 72,
+      "clearview:triggerConditions": ["Account enquiry", "General complaint"]
+    },
+
+    {
+      "@id": "clearview:RedressScale_Minor",
+      "@type": "clearview:RedressScale",
+      "label": "Minor Redress",
+      "clearview:amount": { "@value": "25", "@type": "xsd:decimal" },
+      "clearview:currency": "GBP",
+      "clearview:applicableTo": "Low-impact administrative errors"
+    },
+    {
+      "@id": "clearview:RedressScale_Moderate",
+      "@type": "clearview:RedressScale",
+      "label": "Moderate Redress",
+      "clearview:amount": { "@value": "200", "@type": "xsd:decimal" },
+      "clearview:currency": "GBP",
+      "clearview:applicableTo": "Significant inconvenience or financial loss < £500"
+    },
+    {
+      "@id": "clearview:RedressScale_Severe",
+      "@type": "clearview:RedressScale",
+      "label": "Severe Redress",
+      "clearview:amount": { "@value": "500", "@type": "xsd:decimal" },
+      "clearview:currency": "GBP",
+      "clearview:applicableTo": "Serious detriment, vulnerable customer harm, regulatory breach"
+    },
+
+    {
+      "@id": "clearview:STPThreshold",
+      "@type": "clearview:AutomationRule",
+      "label": "Straight-Through Processing Confidence Threshold",
+      "clearview:minimumConfidence": { "@value": "0.90", "@type": "xsd:decimal" },
+      "clearview:conditions": [
+        "confidence_score >= 0.90",
+        "vulnerability_flag == false",
+        "redress_amount <= 150"
+      ]
+    },
+
+    {
+      "@id": "clearview:HITLRule_HighRedress",
+      "@type": "clearview:EscalationRule",
+      "label": "HITL Required — High Redress",
+      "clearview:trigger": "redress_amount > 150",
+      "clearview:action": "Route to Human Review Panel",
+      "clearview:blocksAutoDispatch": true
+    },
+    {
+      "@id": "clearview:HITLRule_VulnerableCustomer",
+      "@type": "clearview:EscalationRule",
+      "label": "HITL Hard-Stop — Vulnerable Customer",
+      "clearview:trigger": "vulnerability_flag == true",
+      "clearview:action": "Hard-stop; mandatory HITL review before any action",
+      "clearview:blocksAutoDispatch": true
+    },
+    {
+      "@id": "clearview:EscalationRule_LegalThreat",
+      "@type": "clearview:EscalationRule",
+      "label": "Escalation — Legal Threat Detected",
+      "clearview:trigger": "legal_threat_flag == true",
+      "clearview:action": "Route to Investigations team",
+      "clearview:blocksAutoDispatch": true
+    },
+    {
+      "@id": "clearview:EscalationRule_DeadlineAlert",
+      "@type": "clearview:EscalationRule",
+      "label": "Escalation — FCA Deadline < 48h",
+      "clearview:trigger": "hours_to_fca_deadline < 48",
+      "clearview:action": "Alert + auto-escalate to Manager queue",
+      "clearview:blocksAutoDispatch": false
+    },
+
+    {
+      "@id": "clearview:VulnerabilityMarkers",
+      "@type": "clearview:VulnerabilityClassifier",
+      "label": "FCA Consumer Duty Vulnerability Markers",
+      "clearview:markers": [
+        "Mental health condition",
+        "Learning disability",
+        "Physical disability or illness",
+        "Low financial resilience",
+        "Recent bereavement",
+        "Recent relationship breakdown",
+        "Recent job loss",
+        "Caring responsibilities",
+        "Limited English proficiency",
+        "Elderly and isolated",
+        "Addiction",
+        "Recent trauma or abuse survivor",
+        "Low digital literacy"
+      ],
+      "clearview:detectionMethod": "NLP classifier on complaint_text + CRM KYC flags"
+    },
+
+    {
+      "@id": "clearview:PrecedentArchive",
+      "@type": "clearview:KnowledgeBase",
+      "label": "3-Year Complaint Decision Archive",
+      "clearview:caseCount": 2400,
+      "clearview:status": "upheld",
+      "clearview:indexed": true
+    },
+    {
+      "@id": "clearview:Precedent_DuplicateCharge",
+      "@type": "clearview:Precedent",
+      "label": "Duplicate Charge — Standard Outcome",
+      "clearview:intentType": "duplicate_charge",
+      "clearview:typicalOutcome": "Uphold",
+      "clearview:typicalRedress": { "@value": "200", "@type": "xsd:decimal" },
+      "clearview:fcaRuleRef": "fca:DISP_1_4",
+      "clearview:upholdRate": { "@value": "0.84", "@type": "xsd:decimal" }
+    },
+    {
+      "@id": "clearview:Precedent_UnauthorisedTransaction",
+      "@type": "clearview:Precedent",
+      "label": "Unauthorised Transaction — Standard Outcome",
+      "clearview:intentType": "unauthorised_transaction",
+      "clearview:typicalOutcome": "Uphold",
+      "clearview:typicalRedress": { "@value": "500", "@type": "xsd:decimal" },
+      "clearview:fcaRuleRef": "fca:DISP_1_4",
+      "clearview:upholdRate": { "@value": "0.91", "@type": "xsd:decimal" },
+      "clearview:triggersP1": true
+    },
+    {
+      "@id": "clearview:Precedent_ATMFailure",
+      "@type": "clearview:Precedent",
+      "label": "ATM Failure — Standard Outcome",
+      "clearview:intentType": "atm_failure",
+      "clearview:typicalOutcome": "Uphold",
+      "clearview:typicalRedress": { "@value": "25", "@type": "xsd:decimal" },
+      "clearview:fcaRuleRef": "fca:DISP_1_4",
+      "clearview:upholdRate": { "@value": "0.76", "@type": "xsd:decimal" }
+    },
+    {
+      "@id": "clearview:SeasonalPattern",
+      "@type": "clearview:OperationalInsight",
+      "label": "December/January Volume Surge",
+      "clearview:volumeIncrease": "40%",
+      "clearview:affectedMonths": ["December", "January"],
+      "clearview:recommendation": "Pre-allocate additional analyst capacity"
+    }
+  ]
+}

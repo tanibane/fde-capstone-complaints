@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://clearview-bank.co.uk/schemas/draft-agent.schema.json",
+  "title": "DraftAgentContract",
+  "description": "Input/output schema for the Draft Agent.",
+  "type": "object",
+  "definitions": {
+    "RedressPackage": {
+      "type": "object",
+      "required": ["amount", "currency", "tier", "payment_method"],
+      "properties": {
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "default": "GBP" },
+        "tier": {
+          "type": "string",
+          "enum": ["none", "minor", "moderate", "severe", "custom"]
+        },
+        "payment_method": {
+          "type": "string",
+          "enum": ["account_credit", "cheque", "bank_transfer", "none"]
+        },
+        "payment_ref": { "type": "string" }
+      }
+    },
+    "DraftOutput": {
+      "type": "object",
+      "required": [
+        "complaint_id",
+        "resolution_letter",
+        "redress_package",
+        "stp_eligible",
+        "dispatch_trigger",
+        "audit_trail_id",
+        "fca_deadline",
+        "confidence_score",
+        "data_sources",
+        "processed_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "complaint_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "resolution_letter": {
+          "type": "string",
+          "minLength": 100,
+          "description": "Full text of the customer resolution letter in Clearview brand voice. Empathic, legally precise, non-defensive."
+        },
+        "letter_subject": {
+          "type": "string",
+          "description": "Email/letter subject line"
+        },
+        "redress_package": {
+          "$ref": "#/definitions/RedressPackage"
+        },
+        "stp_eligible": {
+          "type": "boolean",
+          "description": "true ONLY when: confidence_score >= 0.90 AND vulnerability_flag = false AND redress_amount <= 150"
+        },
+        "dispatch_trigger": {
+          "type": "boolean",
+          "description": "true = system should dispatch letter after HITL approval (if required). Never true if vulnerability_flag = true or legal_threat_flag = true."
+        },
+        "hitl_required": {
+          "type": "boolean",
+          "description": "Propagated from Policy Agent. If true, dispatch_trigger must be false until human approves."
+        },
+        "audit_trail_id": {
+          "type": "string",
+          "description": "UUID of the audit log entry written by audit-logger MCP tool"
+        },
+        "fca_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "FCA DISP 1.6 final response deadline (8 weeks from complaint created_at)"
+        },
+        "disp_14_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "FCA DISP 1.4 Summary Resolution Communication deadline (3 days from created_at)"
+        },
+        "confidence_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "data_sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "processed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "stp_eligible": { "const": true } }
+          },
+          "then": {
+            "properties": {
+              "hitl_required": { "const": false },
+              "dispatch_trigger": { "const": true }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "hitl_required": { "const": true } }
+          },
+          "then": {
+            "properties": {
+              "dispatch_trigger": { "const": false }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "output": { "$ref": "#/definitions/DraftOutput" }
+  }
+}

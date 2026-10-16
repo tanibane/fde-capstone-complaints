@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://clearview-bank.co.uk/schemas/policy-agent.schema.json",
+  "title": "PolicyAgentContract",
+  "description": "Input/output schema for the Policy Agent.",
+  "type": "object",
+  "definitions": {
+    "PolicyOutput": {
+      "type": "object",
+      "required": [
+        "complaint_id",
+        "outcome",
+        "fca_rule_refs",
+        "redress_amount",
+        "redress_tier",
+        "redress_currency",
+        "liability_party",
+        "precedent_refs",
+        "confidence_score",
+        "hitl_required",
+        "reasoning_summary",
+        "data_sources",
+        "processed_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "complaint_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "outcome": {
+          "type": "string",
+          "enum": ["Uphold", "Partial Uphold", "Reject"],
+          "description": "Recommended complaint outcome"
+        },
+        "fca_rule_refs": {
+          "type": "array",
+          "description": "FCA DISP rule IDs cited as basis for this decision",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "example": ["fca:DISP_1_4", "fca:ConsumerDuty"]
+        },
+        "redress_amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Calculated redress amount in GBP. 0 = no redress (Reject or non-financial remedy)"
+        },
+        "redress_currency": {
+          "type": "string",
+          "default": "GBP"
+        },
+        "redress_tier": {
+          "type": "string",
+          "enum": ["none", "minor", "moderate", "severe", "custom"],
+          "description": "none=£0 · minor=£25 · moderate=£200 · severe=£500 · custom=agent-calculated amount"
+        },
+        "redress_justification": {
+          "type": "string",
+          "description": "Required when redress_tier is 'custom'"
+        },
+        "liability_party": {
+          "type": "string",
+          "enum": ["bank", "customer", "third_party", "shared"],
+          "description": "Party assessed as liable for the complaint cause"
+        },
+        "precedent_refs": {
+          "type": "array",
+          "description": "Precedent case IDs from Context Studio archive that informed this decision",
+          "items": { "type": "string" }
+        },
+        "sop_refs": {
+          "type": "array",
+          "description": "Standard Operating Procedure references applied",
+          "items": { "type": "string" }
+        },
+        "confidence_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Agent confidence in policy decision. < 0.7 triggers HITL."
+        },
+        "hitl_required": {
+          "type": "boolean",
+          "description": "MUST be true if: redress_amount > 150 OR confidence_score < 0.7 OR vulnerability_flag = true"
+        },
+        "reasoning_summary": {
+          "type": "string",
+          "description": "Structured explanation: evidence considered, rule applied, outcome rationale"
+        },
+        "data_sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "processed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "if": {
+        "properties": { "redress_tier": { "const": "custom" } }
+      },
+      "then": {
+        "required": ["redress_justification"]
+      }
+    }
+  },
+  "properties": {
+    "output": { "$ref": "#/definitions/PolicyOutput" }
+  }
+}

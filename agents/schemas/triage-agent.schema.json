@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://clearview-bank.co.uk/schemas/triage-agent.schema.json",
+  "title": "TriageAgentContract",
+  "description": "Input/output schema for the Triage Agent.",
+  "type": "object",
+  "definitions": {
+    "TriageInput": {
+      "type": "object",
+      "required": ["complaint_id", "customer_id", "channel", "complaint_text", "created_at"],
+      "description": "Extends ComplaintIntake — full intake record passed to Triage Agent",
+      "$ref": "complaint-intake.schema.json"
+    },
+    "TriageOutput": {
+      "type": "object",
+      "required": [
+        "complaint_id",
+        "priority",
+        "intent_type",
+        "vulnerability_flag",
+        "vulnerability_markers",
+        "sentiment_score",
+        "confidence_score",
+        "data_sources",
+        "processed_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "complaint_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["P1", "P2", "P3"],
+          "description": "P1=4h · P2=24h · P3=72h — maps to FCA DISP SLA tiers"
+        },
+        "intent_type": {
+          "type": "string",
+          "enum": [
+            "duplicate_charge",
+            "atm_failure",
+            "unauthorised_transaction",
+            "mortgage_dispute",
+            "account_closure",
+            "data_privacy",
+            "other"
+          ]
+        },
+        "vulnerability_flag": {
+          "type": "boolean",
+          "description": "true if ≥1 FCA Consumer Duty vulnerability marker detected — triggers HITL hard-stop"
+        },
+        "vulnerability_markers": {
+          "type": "array",
+          "description": "List of detected FCA vulnerability markers (from 13-category classifier)",
+          "items": { "type": "string" }
+        },
+        "sentiment_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "0.0 = very negative, 1.0 = very positive"
+        },
+        "channel_weight": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Channel-specific priority weighting applied during triage"
+        },
+        "confidence_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Agent confidence in triage classification. < 0.7 flags for human review"
+        },
+        "hitl_required": {
+          "type": "boolean",
+          "description": "true if vulnerability_flag=true OR confidence_score < 0.7"
+        },
+        "legal_threat_flag": {
+          "type": "boolean",
+          "description": "true if complaint text contains legal threat language — triggers escalation to Investigations"
+        },
+        "data_sources": {
+          "type": "array",
+          "description": "Knowledge graph node IDs or system references consulted",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "reasoning_summary": {
+          "type": "string",
+          "description": "One-paragraph human-readable explanation of triage decision"
+        },
+        "processed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "properties": {
+    "input": { "$ref": "#/definitions/TriageInput" },
+    "output": { "$ref": "#/definitions/TriageOutput" }
+  }
+}
