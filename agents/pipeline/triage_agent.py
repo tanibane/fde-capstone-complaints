@@ -1,4 +1,4 @@
-"""
+﻿"""
 triage_agent.py — Triage Agent Implementation
 Clearview Retail Bank — Agentic Complaints Management
 
@@ -75,7 +75,7 @@ Return ONLY the JSON. No other text."""
                 raw = part
                 break
 
-    output = json.loads(raw)
+    output = json.loads(raw, strict=False)
 
     # Server-side guardrails
     if output.get("vulnerability_flag") is True:

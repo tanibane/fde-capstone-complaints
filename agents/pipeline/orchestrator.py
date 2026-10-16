@@ -1,4 +1,4 @@
-"""
+﻿"""
 orchestrator.py — 4-Agent Pipeline Orchestrator
 Clearview Retail Bank — Agentic Complaints Management
 
@@ -32,6 +32,15 @@ client = anthropic.Anthropic(
     api_key=os.environ.get("ANTHROPIC_AUTH_TOKEN", ""),
     base_url=os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com"),
 )
+
+
+def _call(stage_fn, ctx_dict):
+    """Run an agent stage; retry once if the model returned malformed JSON."""
+    try:
+        return stage_fn(ctx_dict, client)
+    except json.JSONDecodeError as e:
+        log(f"[orchestrator] Malformed JSON from model ({e}); retrying once")
+        return stage_fn(ctx_dict, client)
 
 
 @dataclass
@@ -69,7 +78,7 @@ def run_pipeline(complaint: dict) -> dict:
     # ── STAGE 1: Triage ───────────────────────────────────────────────────────
     try:
         log(f"[orchestrator] Stage 1: Triage")
-        ctx.triage_output = run_triage(asdict(ctx), client)
+        ctx.triage_output = _call(run_triage, asdict(ctx))
         log(f"[orchestrator] Triage complete: priority={ctx.triage_output['priority']}, "
               f"intent={ctx.triage_output['intent_type']}, "
               f"vulnerability={ctx.triage_output['vulnerability_flag']}")
@@ -92,7 +101,7 @@ def run_pipeline(complaint: dict) -> dict:
     # ── STAGE 2: Evidence ─────────────────────────────────────────────────────
     try:
         log(f"[orchestrator] Stage 2: Evidence gathering")
-        ctx.evidence_output = run_evidence(asdict(ctx), client)
+        ctx.evidence_output = _call(run_evidence, asdict(ctx))
         log(f"[orchestrator] Evidence complete: "
               f"{len(ctx.evidence_output.get('transaction_log', []))} transactions, "
               f"{len(ctx.evidence_output.get('card_disputes', []))} disputes")
@@ -105,7 +114,7 @@ def run_pipeline(complaint: dict) -> dict:
     # ── STAGE 3: Policy ───────────────────────────────────────────────────────
     try:
         log(f"[orchestrator] Stage 3: Policy assessment")
-        ctx.policy_output = run_policy(asdict(ctx), client)
+        ctx.policy_output = _call(run_policy, asdict(ctx))
         log(f"[orchestrator] Policy complete: outcome={ctx.policy_output['outcome']}, "
               f"redress=£{ctx.policy_output['redress_amount']}, "
               f"hitl_required={ctx.policy_output['hitl_required']}, "
@@ -119,7 +128,7 @@ def run_pipeline(complaint: dict) -> dict:
     # ── STAGE 4: Draft ────────────────────────────────────────────────────────
     try:
         log(f"[orchestrator] Stage 4: Draft resolution letter")
-        ctx.draft_output = run_draft(asdict(ctx), client)
+        ctx.draft_output = _call(run_draft, asdict(ctx))
         log(f"[orchestrator] Draft complete: stp_eligible={ctx.draft_output['stp_eligible']}, "
               f"dispatch_trigger={ctx.draft_output['dispatch_trigger']}, "
               f"audit_trail_id={ctx.draft_output.get('audit_trail_id')}")

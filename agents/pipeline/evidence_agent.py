@@ -1,4 +1,4 @@
-"""
+﻿"""
 evidence_agent.py — Evidence Agent Implementation
 Clearview Retail Bank — Agentic Complaints Management
 
@@ -69,7 +69,7 @@ Return ONLY the JSON. No other text."""
                 raw = part
                 break
 
-    output = json.loads(raw)
+    output = json.loads(raw, strict=False)
     output["complaint_id"] = complaint_id
     return output
 

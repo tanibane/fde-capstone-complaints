@@ -1,4 +1,4 @@
-"""
+﻿"""
 draft_agent.py — Draft Agent Implementation
 Clearview Retail Bank — Agentic Complaints Management
 
@@ -82,7 +82,7 @@ Return ONLY the JSON. No other text."""
                 raw = part
                 break
 
-    output = json.loads(raw)
+    output = json.loads(raw, strict=False)
 
     # Server-side STP and dispatch guardrails
     stp_eligible = (

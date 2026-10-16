@@ -1,4 +1,4 @@
-"""
+﻿"""
 policy_agent.py — Policy Agent Implementation
 Clearview Retail Bank — Agentic Complaints Management
 
@@ -84,7 +84,7 @@ Return ONLY the JSON. No other text."""
                 raw = part
                 break
 
-    output = json.loads(raw)
+    output = json.loads(raw, strict=False)
 
     # Server-side guardrails
     if float(output.get("redress_amount", 0)) > 150:
